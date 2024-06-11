@@ -38,6 +38,8 @@ const getProductsData = async () => {
   };
 };
 
+
+
 const page = async () => {
   const data = await getSalesData();
   const customerData = await getUserData();

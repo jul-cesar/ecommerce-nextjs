@@ -4,7 +4,7 @@ import { ModeToggle } from "@/components/ThemeToggle";
 
 import { ReactNode } from "react";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
 export default function AdminLayout({
   children,
@@ -15,9 +15,9 @@ export default function AdminLayout({
     <>
       <Navbar>
         <NavLink href={"/admin"}>Admin</NavLink>
-        <NavLink href={"/products"}>Products</NavLink>
-        <NavLink href={"/customers"}>Products</NavLink>
-        <NavLink href={"/sales"}>Sales</NavLink>
+        <NavLink href={"/admin/products"}>Products</NavLink>
+        <NavLink href={"/admin/customers"}>Products</NavLink>
+        <NavLink href={"/admin/sales"}>Sales</NavLink>
         <ModeToggle />
       </Navbar>
       <div className="container p-6">{children}</div>
