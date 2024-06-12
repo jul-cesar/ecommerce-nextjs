@@ -10,7 +10,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { addProductScheme } from "@/schemas/ProductSchema";
 import { useForm } from "react-hook-form";
@@ -24,17 +23,34 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { addProductAction } from "@/actions/products";
 
 export function AddProductsDialog() {
   const form = useForm<z.infer<typeof addProductScheme>>({
     resolver: zodResolver(addProductScheme),
+    defaultValues: {
+      imagePath: undefined,
+      filePath: undefined,
+    },
     reValidateMode: "onChange",
   });
+  const fileRef = form.register("filePath");
+  const imgRef = form.register("imagePath");
 
   const onSubmit = async (data: z.infer<typeof addProductScheme>) => {
-    console.log(addProductAction(data));
+    console.log("Form data:", data);
+
+    // Handle file upload if necessary
+    // const formData = new FormData();
+    // formData.append("file", data.filePath[0]);
+    // formData.append("image", data.imagePath[0]);
+    // for (const key in data) {
+    //   if (key !== "filePath" && key !== "imagePath") {
+    //     formData.append(key, data[key]);
+    //   }
+    // }
+    // send formData to your API
   };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -56,12 +72,7 @@ export function AddProductsDialog() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      id="name"
-                      className="col-span-3"
-                     
-                    />
+                    <Input {...field} id="name" className="col-span-3" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -79,7 +90,6 @@ export function AddProductsDialog() {
                       id="priceInCop"
                       type="number"
                       className="col-span-3"
-                  
                     />
                   </FormControl>
                   <FormMessage />
@@ -99,9 +109,32 @@ export function AddProductsDialog() {
                 </FormItem>
               )}
             />
-            <input type="file" name="file" {...form} />
-            <input type="file" name="image" {...form} />
-
+            <FormField
+              name="filePath"
+              control={form.control}
+              render={() => (
+                <FormItem>
+                  <FormLabel>File</FormLabel>
+                  <FormControl>
+                    <Input type="file" className="col-span-3"  {...fileRef} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="imagePath"
+              control={form.control}
+              render={() => (
+                <FormItem>
+                  <FormLabel>Image</FormLabel>
+                  <FormControl>
+                    <Input type="file" className="col-span-3"  {...imgRef}  />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <DialogFooter>
               <Button type="submit">Save</Button>
             </DialogFooter>
