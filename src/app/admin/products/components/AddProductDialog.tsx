@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { addProductScheme } from "@/schemas/ProductSchema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,8 +22,20 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { addProductAction } from "@/actions/products";
+import { useFormState } from "react-dom";
+import { useEffect, useState, useRef } from "react";
+import { addProductScheme } from "@/schemas/ProductSchema";
+
+import SubmitButton from "./SubmitButton";
+import { toast } from "sonner";
 
 export function AddProductsDialog() {
+  const [open, setOpen] = useState(false);
+
+  const [state, action] = useFormState(addProductAction, {
+    message: "",
+  });
   const form = useForm<z.infer<typeof addProductScheme>>({
     resolver: zodResolver(addProductScheme),
     defaultValues: {
@@ -36,23 +47,14 @@ export function AddProductsDialog() {
   const fileRef = form.register("filePath");
   const imgRef = form.register("imagePath");
 
-  const onSubmit = async (data: z.infer<typeof addProductScheme>) => {
-    console.log("Form data:", data);
+  const formRef = useRef<HTMLFormElement>(null);
 
-    // Handle file upload if necessary
-    // const formData = new FormData();
-    // formData.append("file", data.filePath[0]);
-    // formData.append("image", data.imagePath[0]);
-    // for (const key in data) {
-    //   if (key !== "filePath" && key !== "imagePath") {
-    //     formData.append(key, data[key]);
-    //   }
-    // }
-    // send formData to your API
-  };
+  useEffect(() => {
+    form.reset();
+  }, [open]);
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={(open) => setOpen(open)}>
       <DialogTrigger asChild>
         <Button>Add product</Button>
       </DialogTrigger>
@@ -62,40 +64,52 @@ export function AddProductsDialog() {
         </DialogHeader>
         <Form {...form}>
           <form
+            action={action}
             className="grid gap-4 py-4"
-            onSubmit={form.handleSubmit(onSubmit)}
+            ref={formRef}
+            onSubmit={(evt) => {
+              evt.preventDefault();
+              form.handleSubmit(() => {
+                action(new FormData(formRef.current!));
+                toast.success(state.message);
+                setOpen(!open);
+              })(evt);
+            }}
           >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} id="name" className="col-span-3" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="priceInCop"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price in COP</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      id="priceInCop"
-                      type="number"
-                      className="col-span-3"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-row gap-5 justify-between">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} id="name" className="col-span-3" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="priceInCop"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price in COP</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        id="priceInCop"
+                        type="number"
+                        className="col-span-3"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
               name="description"
@@ -116,7 +130,7 @@ export function AddProductsDialog() {
                 <FormItem>
                   <FormLabel>File</FormLabel>
                   <FormControl>
-                    <Input type="file" className="col-span-3"  {...fileRef} />
+                    <Input type="file" className="col-span-3" {...fileRef} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -129,14 +143,14 @@ export function AddProductsDialog() {
                 <FormItem>
                   <FormLabel>Image</FormLabel>
                   <FormControl>
-                    <Input type="file" className="col-span-3"  {...imgRef}  />
+                    <Input type="file" className="col-span-3" {...imgRef} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="submit">Save</Button>
+              <SubmitButton />
             </DialogFooter>
           </form>
         </Form>

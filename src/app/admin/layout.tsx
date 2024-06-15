@@ -16,7 +16,7 @@ export default function AdminLayout({
       <Navbar>
         <NavLink href={"/admin"}>Admin</NavLink>
         <NavLink href={"/admin/products"}>Products</NavLink>
-        <NavLink href={"/admin/customers"}>Products</NavLink>
+        <NavLink href={"/admin/customers"}>Customers</NavLink>
         <NavLink href={"/admin/sales"}>Sales</NavLink>
         <ModeToggle />
       </Navbar>
