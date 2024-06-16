@@ -16,3 +16,12 @@ export const addProductScheme = z.object({
     .custom<FileList>((val) => val instanceof FileList, "Required")
     .refine((file) => file.item(0)?.type.startsWith("image/")),
 });
+
+export const editSchema = addProductScheme.extend({
+  filePath: z
+    .custom<FileList>((val) => val instanceof FileList, "Required")
+    .optional(),
+  imagePath: z
+    .custom<FileList>((val) => val instanceof FileList, "Required")
+    .optional(),
+});

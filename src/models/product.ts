@@ -5,7 +5,7 @@ export interface Product {
   filePath: string;
   imagePath: string;
   description: string;
-  isAvailableToBuy: string;
+  isAvailableToBuy: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -10,9 +10,16 @@ const ProductsTable = async () => {
       priceInCop: true,
       id: true,
       isAvailableToBuy: true,
-
+      description:true,
+      createdAt: true,
+      updatedAt: true,
+      imagePath: true,
+      filePath: true,
       _count: { select: { Order: true } },
     },
+    orderBy: {
+      createdAt: "desc"
+    }
   });
 
   const productsTableData = products.map((product) => ({
@@ -21,6 +28,13 @@ const ProductsTable = async () => {
     priceInCop: Number(product.priceInCop),
     order: product._count.Order,
     isAvailableToBuy: product.isAvailableToBuy,
+    count: product._count.Order,
+    description: product.description,
+    imagePath: product.imagePath,
+    createdAt: product.createdAt,
+    updatedAt: product.updatedAt,
+    filePath: product.filePath,
+
   }));
 
   return (
