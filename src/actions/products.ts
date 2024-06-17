@@ -3,7 +3,7 @@
 import prisma from "@/db/db";
 import fs from "fs/promises";
 import crypto from "crypto";
-import { z } from "zod";
+import { any, z } from "zod";
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 
@@ -24,9 +24,7 @@ const ProductSchemeServer = z.object({
 });
 
 const editSchema = ProductSchemeServer.extend({
-  filePath: z
-    .custom<File>((val) => val instanceof File, "Required")
-    .optional(),
+  filePath: z.custom<File>((val) => val instanceof File, "Required").optional(),
   imagePath: z
     .custom<File>((val) => val instanceof File, "Required")
     .optional(),
@@ -111,15 +109,19 @@ export const editProductAction = async (
   let filePath = product.filePath;
 
   if (dataProduct.filePath !== null) {
-    await fs.unlink(product?.filePath);
-    const file = data.get("filePath") as File;
+    try {
+      await fs.unlink(product?.filePath);
+      const file = data.get("filePath") as File;
 
-    const fileName = `${crypto.randomUUID()}-${file.name}`;
-    filePath = `products/${fileName}`;
+      const fileName = `${crypto.randomUUID()}-${file.name}`;
+      filePath = `products/${fileName}`;
 
-    const arrayBuffer = await file.arrayBuffer();
+      const arrayBuffer = await file.arrayBuffer();
 
-    await fs.writeFile(filePath, Buffer.from(arrayBuffer));
+      await fs.writeFile(filePath, Buffer.from(arrayBuffer));
+    } catch (e: any) {
+      console.error(e.message);
+    }
   }
 
   let imagePath = product.imagePath;
@@ -151,14 +153,18 @@ export const editProductAction = async (
 };
 
 export const deleteProduct = async (id: string) => {
-  const product = await prisma.product.delete({
-    where: {
-      id,
-    },
-  });
-  await fs.unlink(product.filePath);
-  await fs.unlink(product.imagePath);
-  revalidatePath("/admin/products", "page");
+  try {
+    const product = await prisma.product.delete({
+      where: {
+        id,
+      },
+    });
+    await fs.unlink(product.filePath);
+    await fs.unlink(product.imagePath);
+    revalidatePath("/admin/products", "page");
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const toggleAvailibity = async (id: string, isAvailable: boolean) => {
