@@ -17,27 +17,34 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { addProductAction } from "@/actions/products";
+import { addProductAction, editProductAction } from "@/actions/products";
 import { useFormState } from "react-dom";
 import { useEffect, useState, useRef } from "react";
-import { addProductScheme } from "@/schemas/ProductSchema";
+import { addProductScheme, editSchema } from "@/schemas/ProductSchema";
 
 import SubmitButton from "./SubmitButton";
 import { toast } from "sonner";
+import { Product } from "@/models/product";
 
-export function AddProductsDialog() {
+export function DialogProductForm({ product }: { product?: Product | null }) {
   const [open, setOpen] = useState(false);
 
-  const [state, action] = useFormState(addProductAction, {
-    message: "",
-  });
-  const form = useForm<z.infer<typeof addProductScheme>>({
-    resolver: zodResolver(addProductScheme),
+  const [state, action] = useFormState(
+    !product ? addProductAction : editProductAction.bind(null, product.id),
+    {
+      message: "",
+    }
+  );
+  const schemaType = product ? editSchema : addProductScheme;
+
+  const form = useForm<z.infer<typeof schemaType>>({
+    resolver: zodResolver(schemaType),
     defaultValues: {
       imagePath: undefined,
       filePath: undefined,
@@ -56,11 +63,13 @@ export function AddProductsDialog() {
   return (
     <Dialog open={open} onOpenChange={(open) => setOpen(open)}>
       <DialogTrigger asChild>
-        <Button>Add product</Button>
+        <Button>{product ? "Edit" : "Add a new product"}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add a new product</DialogTitle>
+          <DialogTitle>
+            {product ? "Edit product" : "Add new product"}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -71,7 +80,7 @@ export function AddProductsDialog() {
               evt.preventDefault();
               form.handleSubmit(() => {
                 action(new FormData(formRef.current!));
-                toast.success(state.message);
+                toast.success(state.message || "Product created succesfully");
                 setOpen(!open);
               })(evt);
             }}
@@ -132,6 +141,9 @@ export function AddProductsDialog() {
                   <FormControl>
                     <Input type="file" className="col-span-3" {...fileRef} />
                   </FormControl>
+                  <FormDescription>
+                    {product !== null && product?.filePath}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -145,6 +157,9 @@ export function AddProductsDialog() {
                   <FormControl>
                     <Input type="file" className="col-span-3" {...imgRef} />
                   </FormControl>
+                  <FormDescription>
+                    {product !== null && product?.imagePath}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

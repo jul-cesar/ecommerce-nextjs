@@ -10,26 +10,44 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LuMoreHorizontal, LuXCircle } from "react-icons/lu";
+import {
+  LuFolderEdit,
+  LuMoreHorizontal,
+  LuTrash,
+  LuXCircle,
+} from "react-icons/lu";
 import { DataTableColumnHeader } from "./DataTableColumnHeader";
 import { CheckCircledIcon } from "@radix-ui/react-icons";
+import DeleteProductTransition from "../transitions/DeleteProduct";
+import ToggleAvailibityTransition from "../transitions/ToggleProductAvailibity";
+import { DialogProductForm } from "./DialogProductForm";
 
 export interface ProductsTableInterface {
   id: string;
   name: string;
   priceInCop: number;
   order: number;
+  count: number;
+  filePath: string;
+  imagePath: string;
+  createdAt: Date;
+  description: string;
+  updatedAt: Date;
   isAvailableToBuy: boolean;
 }
 
 export const columns: ColumnDef<ProductsTableInterface>[] = [
   {
     accessorKey: "",
-    id: "actions",
+    id: "availibity",
     header: "",
     cell: ({ row }) => {
       const product = row.original;
-      return product.isAvailableToBuy ? <CheckCircledIcon /> : <LuXCircle />;
+      return product.isAvailableToBuy ? (
+        <CheckCircledIcon className="size-5" />
+      ) : (
+        <LuXCircle className="size-5" />
+      );
     },
   },
   {
@@ -67,12 +85,17 @@ export const columns: ColumnDef<ProductsTableInterface>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(product.id)}
-            >
-              Copy payment ID
-            </DropdownMenuItem>
+            <DropdownMenuLabel>Options</DropdownMenuLabel>
+            <DeleteProductTransition
+              id={product.id}
+              disabled={product.count > 0}
+            />
+            <ToggleAvailibityTransition
+              id={product.id}
+              isAvailable={product.isAvailableToBuy}
+            />
+            <DialogProductForm product={product} />
+
             <DropdownMenuSeparator />
             <DropdownMenuItem>View customer</DropdownMenuItem>
             <DropdownMenuItem>View payment details</DropdownMenuItem>
